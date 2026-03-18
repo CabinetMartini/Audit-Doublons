@@ -1,0 +1,38 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: large-body
+  namespace: default
+spec:
+  buffering:
+    maxRequestBodyBytes: 104857600  # 100MB
+---
+apiVersion: traefik.io/v1alpha1
+kind: ServersTransport
+metadata:
+  name: long-timeout
+  namespace: default
+spec:
+  forwardingTimeouts:
+    dialTimeout: 400s
+    responseHeaderTimeout: 400s
+    idleConnTimeout: 400s
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: api-audit-doublons
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: Host(`logiciel.cabinet-martini.fr`) && PathPrefix(`/audit-doublons`)
+      kind: Rule
+      priority: 200
+      services:
+        - name: api-audit-doublons
+          port: 8023
+          serversTransport: long-timeout
+      middlewares:
+        - name: large-body

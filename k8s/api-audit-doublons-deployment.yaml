@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-audit-doublons
+  labels:
+    app: api-audit-doublons
+    version: v1
+spec:
+  replicas: 1  # HA - ajustez selon vos besoins
+  selector:
+    matchLabels:
+      app: api-audit-doublons
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero downtime
+  template:
+    metadata:
+      labels:
+        app: api-audit-doublons
+        version: v1
+    spec:
+      containers:
+        - name: api-audit-doublons
+          image: localhost:5000/api-audit-doublons:latest
+          imagePullPolicy: Always
+          
+          ports:
+            - name: http
+              containerPort: 8023
+              protocol: TCP
+          
+          # Probes améliorées
+          livenessProbe:
+            httpGet:
+              path: /audit-doublons/health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          
+          readinessProbe:
+            httpGet:
+              path: /audit-doublons/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          
+          # Ressources définies
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          
+          # Security context
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+
+          # Volumes pour les répertoires temporaires et de travail
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      # Volumes
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+      # Anti-affinity pour éviter de mettre tous les pods sur le même node
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: api-audit-doublons
+                topologyKey: kubernetes.io/hostname
+      
+      # Termination grace period
+      terminationGracePeriodSeconds: 300
+

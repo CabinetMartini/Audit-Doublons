@@ -4,7 +4,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "app.internal.main:app",
         host="localhost",
-        port=8022,
+        port=8023,
         log_level="info",
-        reload=True,
+        #reload=True,
     )

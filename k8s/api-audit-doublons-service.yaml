@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-audit-doublons
+  labels:
+    app: api-audit-doublons
+spec:
+  type: NodePort
+  selector:
+    app: api-audit-doublons
+  ports:
+    - name: http
+      port: 8023
+      targetPort: http
+      nodePort: 30023  # Port accessible depuis Apache
+      protocol: TCP
