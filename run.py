@@ -2,9 +2,9 @@ import uvicorn # type: ignore
 
 if __name__ == "__main__":
     uvicorn.run(
-        "app.main:app",
+        "app.internal.main:app",
         host="localhost",
-        port=8080,
+        port=8022,
         log_level="info",
         reload=True,
     )

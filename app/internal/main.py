@@ -34,8 +34,8 @@ CORS_CONFIG = {
 }
 
 ROUTER_CONFIG = [
-    {"router": route, "prefix": "/api", "tags": ["Exemple Api"]},
-    {"router": health,    "prefix": "/api", "tags": ["Health Check"]},
+    {"router": route, "prefix": "/audit-doublons", "tags": ["Recherches de doublons"]},
+    {"router": health,    "prefix": "/audit-doublons", "tags": ["Health Check"]},
 ]
 
 
